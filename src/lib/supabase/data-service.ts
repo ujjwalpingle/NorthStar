@@ -16,6 +16,7 @@ import type {
   StudyTopic,
   InterviewPrep,
   CareerGoal,
+  Profile,
 } from "@/lib/types";
 
 export async function loadProfileData(userId: string): Promise<Partial<AppData> | null> {
