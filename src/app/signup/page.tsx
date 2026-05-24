@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { isDemoMode } from "@/lib/config";
 import { EUROPE_COUNTRIES, type Currency } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -64,21 +65,21 @@ export default function SignupPage() {
         );
         router.push("/dashboard");
       } else {
-        // Real Supabase Auth would go here
-        const response = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-            fullName: formData.fullName,
-            baseCurrency: formData.baseCurrency,
-            targetCountry: formData.targetCountry,
-          }),
+        const supabase = createClient();
+        const { error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.fullName,
+              baseCurrency: formData.baseCurrency,
+              targetCountry: formData.targetCountry,
+            }
+          }
         });
-        const data = await response.json();
-        if (!response.ok) {
-          setError(data.error || "Signup failed");
+
+        if (authError) {
+          setError(authError.message);
         } else {
           router.push("/dashboard");
         }

@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isDemoMode } from "@/lib/config";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,19 +27,17 @@ export default function LoginPage() {
     try {
       if (demo) {
         // Demo mode: just redirect to dashboard
-        // In a real app, this would call Supabase Auth
         localStorage.setItem("demo_user", JSON.stringify({ email, name: email.split("@")[0] }));
         router.push("/dashboard");
       } else {
-        // Real Supabase Auth would go here
-        const response = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+        const supabase = createClient();
+        const { error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        const data = await response.json();
-        if (!response.ok) {
-          setError(data.error || "Login failed");
+
+        if (authError) {
+          setError(authError.message);
         } else {
           router.push("/dashboard");
         }

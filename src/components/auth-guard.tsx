@@ -1,84 +1,47 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
-import { Lock, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { isDemoMode, getAuthPassword, isSupabaseConfigured } from "@/lib/config";
+import { usePathname, useRouter } from "next/navigation";
+import { isDemoMode, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/client";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const demo = isDemoMode();
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  async function checkAuth() {
-    // Check if using Supabase
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
-      } catch (err) {
-        // Fallback to localStorage if Supabase fails
-        const auth = localStorage.getItem("northstar_auth");
-        setIsAuthenticated(auth === "true");
-      }
-    } else {
-      // Demo/Local mode: check localStorage
-      const auth = localStorage.getItem("northstar_auth");
-      setIsAuthenticated(auth === "true");
-    }
-  }
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
+    async function checkAuth() {
       if (isSupabaseConfigured()) {
-        // Supabase authentication
-        const supabase = createClient();
-        const { error: authError } = await supabase.auth.signInWithPassword({
-          email: email || "user@northstar.app",
-          password: password,
-        });
-
-        if (authError) {
-          setError(authError.message || "Authentication failed");
-        } else {
-          setIsAuthenticated(true);
-          setError("");
-          setEmail("");
-          setPassword("");
+        try {
+          const supabase = createClient();
+          const { data: { session } } = await supabase.auth.getSession();
+          setIsAuthenticated(!!session);
+        } catch (err) {
+          setIsAuthenticated(false);
         }
       } else {
-        // Demo/Local mode: simple password
-        const correctPassword = getAuthPassword();
-        if (password === correctPassword) {
-          localStorage.setItem("northstar_auth", "true");
-          setIsAuthenticated(true);
-          setError("");
-          setPassword("");
-        } else {
-          setError("Invalid password");
-        }
+        const demoUser = localStorage.getItem("demo_user");
+        const legacyAuth = localStorage.getItem("northstar_auth");
+        setIsAuthenticated(!!demoUser || legacyAuth === "true");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
-    } finally {
-      setLoading(false);
     }
-  }
+    checkAuth();
+
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        setIsAuthenticated(!!session);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated === false && pathname !== "/login" && pathname !== "/signup") {
+      router.push("/login");
+    }
+  }, [isAuthenticated, pathname, router]);
 
   async function handleLogout() {
     if (isSupabaseConfigured()) {
@@ -90,10 +53,10 @@ export function AuthGuard({ children }: { children: ReactNode }) {
       }
     } else {
       localStorage.removeItem("northstar_auth");
+      localStorage.removeItem("demo_user");
     }
     setIsAuthenticated(false);
-    setEmail("");
-    setPassword("");
+    router.push("/login");
   }
 
   // Prevent flash of content before checking auth state
@@ -101,85 +64,18 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     return <div className="min-h-screen bg-background" />;
   }
 
+  // Allow public routes
+  if (pathname === "/login" || pathname === "/signup") {
+    // If already authenticated and trying to access login/signup, redirect to dashboard
+    if (isAuthenticated) {
+      router.push("/dashboard");
+      return <div className="min-h-screen bg-background" />;
+    }
+    return <>{children}</>;
+  }
+
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
-        
-        <Card className="w-full max-w-sm relative z-10 border-border/50 shadow-2xl shadow-primary/5">
-          <CardHeader className="space-y-3 pb-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
-              <Lock className="h-6 w-6 text-primary" />
-            </div>
-            <div className="space-y-2">
-              <CardTitle className="text-2xl">Welcome to NorthStar</CardTitle>
-              <CardDescription>
-                {isSupabaseConfigured() 
-                  ? "Sign in with your credentials"
-                  : "Enter your password to continue"}
-              </CardDescription>
-            </div>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              {isSupabaseConfigured() && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email</label>
-                  <Input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                    autoFocus
-                  />
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {isSupabaseConfigured() ? "Password" : "Access Password"}
-                </label>
-                <Input
-                  type="password"
-                  placeholder={isSupabaseConfigured() ? "••••••••" : "Enter password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  autoFocus={!isSupabaseConfigured()}
-                />
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={loading || !password}
-                className="w-full"
-              >
-                {loading ? "Signing in..." : (
-                  <>
-                    Sign In
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-
-              {isSupabaseConfigured() && (
-                <div className="text-center text-xs text-muted-foreground">
-                  Single-user app • Your data syncs across devices
-                </div>
-              )}
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <div className="min-h-screen bg-background" />; // will redirect in useEffect
   }
 
   // Authenticated - render children with logout button
@@ -188,7 +84,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
       {children}
       <button
         onClick={handleLogout}
-        className="fixed bottom-4 right-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        className="fixed bottom-4 right-4 text-xs text-muted-foreground hover:text-foreground transition-colors z-50 bg-background/80 px-2 py-1 rounded border shadow-sm backdrop-blur"
         title="Sign out"
       >
         Sign out

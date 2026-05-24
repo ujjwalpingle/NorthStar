@@ -194,7 +194,7 @@ create table if not exists public.career_goals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade unique,
   current_phase integer not null default 1,
-  current_role text default '',
+  "current_role" text default '',
   years_of_experience numeric(5,2) not null default 0,
   primary_focus text not null default 'platform-engineering' check (primary_focus in ('platform-engineering','sre','cloud-security','mlops')),
   target_salary_phase_3 numeric(15,2),
