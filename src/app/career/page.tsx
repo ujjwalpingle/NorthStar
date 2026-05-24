@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { CheckCircle2, Circle, Briefcase, Zap, Target, TrendingUp } from "lucide-react";
+import {
+  BookOpen, Briefcase, CheckCircle2, Circle, Code2,
+  MessageSquare, Target, TrendingUp, Zap,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,10 +14,11 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/contexts/app-context";
-import type { Skill } from "@/lib/types";
+import type { Skill, StudyTopic } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export default function CareerPage() {
-  const { data, updateCareerGoal, toggleCareerMilestone, updateSkillLevel } = useApp();
+  const { data, updateCareerGoal, toggleCareerMilestone, updateSkillLevel, updateStudyTopic } = useApp();
   const career = data.career;
   const [selectedPhase, setSelectedPhase] = useState<1 | 2 | 3 | 4 | 5>(1);
 
@@ -127,10 +131,12 @@ export default function CareerPage() {
 
         {/* Phase Details */}
         <Tabs defaultValue="milestones" className="w-full">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="milestones">Milestones</TabsTrigger>
             <TabsTrigger value="skills">Skills</TabsTrigger>
-            <TabsTrigger value="companies">Target Companies</TabsTrigger>
+            <TabsTrigger value="companies">Companies</TabsTrigger>
+            <TabsTrigger value="interview">Interview Prep</TabsTrigger>
+            <TabsTrigger value="study">Study Roadmap</TabsTrigger>
           </TabsList>
 
           <TabsContent value="milestones" className="space-y-4">
@@ -276,6 +282,107 @@ export default function CareerPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ── Interview Prep ── */}
+          <TabsContent value="interview" className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { label: "DSA Solved",     value: `${data.interviewPrep?.dsaSolved ?? 0}/${data.interviewPrep?.dsaTarget ?? 300}`, icon: Code2,        color: "text-primary" },
+                { label: "System Design",  value: `${data.interviewPrep?.systemDesignSessions ?? 0} sessions`,                    icon: MessageSquare, color: "text-blue-400" },
+                { label: "Mock Interviews", value: `${data.interviewPrep?.mockInterviews ?? 0} done`,                              icon: Briefcase,     color: "text-emerald-400" },
+                { label: "Resume",         value: data.interviewPrep?.resumeVersion ?? "v1.0",                                    icon: Target,        color: "text-yellow-400" },
+              ].map(({ label, value, icon: Icon, color }) => (
+                <Card key={label}>
+                  <CardContent className="p-4">
+                    <Icon className={cn("h-4 w-4 mb-2", color)} />
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="font-semibold text-sm mt-0.5">{value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>DSA Progress</CardTitle>
+                <CardDescription>{data.interviewPrep?.dsaSolved ?? 0} of {data.interviewPrep?.dsaTarget ?? 300} solved</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-3 w-full rounded-full bg-secondary/70 overflow-hidden">
+                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round(((data.interviewPrep?.dsaSolved ?? 0) / (data.interviewPrep?.dsaTarget ?? 300)) * 100)}%` }} />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Job Applications</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {(data.interviewPrep?.applications ?? []).map((app) => {
+                  const statusColor: Record<string, "secondary" | "destructive" | "default" | "outline" | "warning"> = {
+                    wishlist: "secondary", applied: "secondary", screening: "warning",
+                    interview: "default", offer: "secondary", rejected: "destructive",
+                  };
+                  return (
+                    <div key={app.id} className="flex items-start justify-between rounded-lg border border-border px-4 py-3 gap-3">
+                      <div>
+                        <p className="font-medium text-sm">{app.company}</p>
+                        <p className="text-xs text-muted-foreground">{app.role}</p>
+                        {app.notes && <p className="text-xs text-muted-foreground mt-1 opacity-70">💡 {app.notes}</p>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <Badge variant={statusColor[app.status] ?? "secondary"} className="capitalize">{app.status}</Badge>
+                        {app.appliedDate && <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(app.appliedDate), "MMM d")}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── Study Roadmap ── */}
+          <TabsContent value="study" className="space-y-4">
+            {Array.from(new Set(data.studyRoadmap.map((t) => t.skill))).map((skill) => {
+              const topics = data.studyRoadmap.filter((t) => t.skill === skill);
+              const done = topics.filter((t) => t.status === "completed").length;
+              const pct = Math.round((done / topics.length) * 100);
+              return (
+                <Card key={skill}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>{skill}</CardTitle>
+                      <span className="text-xs text-muted-foreground">{done}/{topics.length} done · {pct}%</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-secondary/70 overflow-hidden mt-1">
+                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-1.5">
+                    {topics.map((topic) => (
+                      <button
+                        key={topic.id}
+                        onClick={() => {
+                          const next = topic.status === "not_started" ? "in_progress" : topic.status === "in_progress" ? "completed" : "not_started";
+                          updateStudyTopic(topic.id, { status: next });
+                        }}
+                        className="w-full flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent/40 transition-colors text-left"
+                      >
+                        <span className={cn(
+                          "text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0",
+                          topic.status === "completed"   ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20" :
+                          topic.status === "in_progress" ? "bg-primary/10 text-primary border-primary/20" :
+                          "bg-muted/50 text-muted-foreground border-border"
+                        )}>
+                          {topic.status === "completed" ? "✓ Done" : topic.status === "in_progress" ? "Active" : "Todo"}
+                        </span>
+                        <span className={cn("text-sm flex-1", topic.status === "completed" && "line-through text-muted-foreground")}>{topic.topic}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{topic.estimatedHours}h</span>
+                      </button>
+                    ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
         </Tabs>
 
         {/* Projects */}

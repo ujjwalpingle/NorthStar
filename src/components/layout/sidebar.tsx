@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 import {
   Briefcase,
   Compass,
+  Flame,
   LayoutDashboard,
   Settings,
+  Target,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -16,6 +18,8 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/wealth",    label: "Wealth",    icon: Wallet },
   { href: "/career",   label: "Career",    icon: Briefcase },
+  { href: "/habits",   label: "Habits",    icon: Flame },
+  { href: "/goals",    label: "Goals",     icon: Target },
   { href: "/migration",label: "Migration", icon: Compass },
   { href: "/settings", label: "Settings",  icon: Settings },
 ];
@@ -33,12 +37,12 @@ export function Sidebar() {
         </div>
         <div className="leading-tight">
           <p className="text-sm font-semibold tracking-tight">NorthStar</p>
-          <p className="text-[11px] text-muted-foreground">Ujjwal's Tracker</p>
+          <p className="text-[11px] text-muted-foreground">Ujjwal's OS</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-5 space-y-0.5">
+      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
         <p className="px-2 mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
           Navigation
         </p>
@@ -55,7 +59,6 @@ export function Sidebar() {
                   : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
               )}
             >
-              {/* Active left indicator */}
               {active && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
               )}

@@ -2,22 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Briefcase,
-  Compass,
-  LayoutDashboard,
-  Settings,
-  TrendingUp,
-  Wallet,
-} from "lucide-react";
+import { Briefcase, Compass, Flame, LayoutDashboard, Settings, Target, TrendingUp, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Home",      icon: LayoutDashboard },
   { href: "/wealth",    label: "Wealth",    icon: Wallet },
-  { href: "/career",   label: "Career",    icon: Briefcase },
+  { href: "/habits",   label: "Habits",    icon: Flame },
+  { href: "/goals",    label: "Goals",     icon: Target },
   { href: "/migration",label: "Migration", icon: Compass },
-  { href: "/settings", label: "Settings",  icon: Settings },
 ];
 
 export function MobileNav() {
@@ -25,7 +18,6 @@ export function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-      {/* Frosted glass border top */}
       <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="bg-sidebar/95 backdrop-blur-xl">
         <div className="flex items-center justify-around px-1 py-2 pb-safe">
@@ -37,15 +29,10 @@ export function MobileNav() {
                 href={href}
                 className={cn(
                   "flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-all",
-                  active
-                    ? "text-primary"
-                    : "text-muted-foreground active:scale-95"
+                  active ? "text-primary" : "text-muted-foreground active:scale-95"
                 )}
               >
-                <div className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
-                  active ? "bg-primary/15" : "bg-transparent"
-                )}>
+                <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg transition-all", active ? "bg-primary/15" : "bg-transparent")}>
                   <Icon className={cn("h-4 w-4 transition-transform", active && "scale-110")} />
                 </div>
                 <span className={cn(active && "text-primary font-semibold")}>{label}</span>

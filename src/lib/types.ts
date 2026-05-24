@@ -1,6 +1,7 @@
-export type Currency = "EUR" | "USD" | "GBP" | "CHF";
+// ─── Core ─────────────────────────────────────────────────────────────────────
 
-export type AccountType = "checking" | "savings" | "investment" | "crypto" | "property" | "other";
+export type Currency = "EUR" | "USD" | "GBP" | "CHF" | "INR";
+export type AccountType = "checking" | "savings" | "investment" | "crypto" | "property" | "gold" | "other";
 export type AccountCategory = "asset" | "liability";
 
 export interface Profile {
@@ -51,13 +52,7 @@ export interface MigrationGoal {
 }
 
 export type ChecklistCategory =
-  | "visa"
-  | "documents"
-  | "finance"
-  | "housing"
-  | "healthcare"
-  | "tax"
-  | "other";
+  | "visa" | "documents" | "finance" | "housing" | "healthcare" | "tax" | "other";
 
 export interface ChecklistItem {
   id: string;
@@ -72,6 +67,97 @@ export interface ChecklistItem {
   updated_at: string;
 }
 
+// ─── Habits ───────────────────────────────────────────────────────────────────
+
+export type HabitCategory = "fitness" | "learning" | "career" | "life" | "finance";
+
+export interface Habit {
+  id: string;
+  name: string;
+  icon: string;
+  category: HabitCategory;
+  frequency: "daily" | "weekly";
+  targetCount: number;
+  created_at: string;
+}
+
+export interface HabitLog {
+  id: string;
+  habit_id: string;
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
+// ─── Goals ────────────────────────────────────────────────────────────────────
+
+export type GoalCategory = "financial" | "career" | "migration" | "fitness" | "learning";
+
+export interface GoalMilestone {
+  id: string;
+  title: string;
+  completed: boolean;
+  dueDate: string | null;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  category: GoalCategory;
+  deadline: string | null;
+  milestones: GoalMilestone[];
+  targetValue: number | null;
+  currentValue: number | null;
+  unit: string;
+  status: "active" | "completed" | "paused";
+  created_at: string;
+}
+
+// ─── Daily Tasks ──────────────────────────────────────────────────────────────
+
+export interface DailyTask {
+  id: string;
+  title: string;
+  completed: boolean;
+  date: string; // YYYY-MM-DD
+  category: "work" | "learning" | "personal" | "migration";
+  priority: "low" | "medium" | "high";
+}
+
+// ─── Study Roadmap ────────────────────────────────────────────────────────────
+
+export interface StudyTopic {
+  id: string;
+  skill: string;
+  topic: string;
+  status: "not_started" | "in_progress" | "completed";
+  resources: string[];
+  estimatedHours: number;
+  completedHours: number;
+}
+
+// ─── Interview Prep ───────────────────────────────────────────────────────────
+
+export interface JobApplication {
+  id: string;
+  company: string;
+  role: string;
+  status: "wishlist" | "applied" | "screening" | "interview" | "offer" | "rejected";
+  appliedDate: string | null;
+  notes: string;
+}
+
+export interface InterviewPrep {
+  dsaSolved: number;
+  dsaTarget: number;
+  systemDesignSessions: number;
+  mockInterviews: number;
+  resumeVersion: string;
+  applications: JobApplication[];
+}
+
+// ─── App Data (root) ──────────────────────────────────────────────────────────
+
 export interface AppData {
   profile: Profile;
   accounts: Account[];
@@ -79,7 +165,15 @@ export interface AppData {
   migrationGoal: MigrationGoal | null;
   checklist: ChecklistItem[];
   career: CareerGoal;
+  habits: Habit[];
+  habitLogs: HabitLog[];
+  goals: Goal[];
+  dailyTasks: DailyTask[];
+  studyRoadmap: StudyTopic[];
+  interviewPrep: InterviewPrep;
 }
+
+// ─── Career ───────────────────────────────────────────────────────────────────
 
 export type CareerPhase = 1 | 2 | 3 | 4 | 5;
 
@@ -128,39 +222,19 @@ export interface CareerGoal {
   notes: string;
 }
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 export const EUROPE_COUNTRIES = [
-  "Germany",
-  "France",
-  "Netherlands",
-  "Spain",
-  "Portugal",
-  "Italy",
-  "Ireland",
-  "Austria",
-  "Belgium",
-  "Sweden",
-  "Denmark",
-  "Finland",
-  "Norway",
-  "Switzerland",
-  "Poland",
-  "Czech Republic",
-  "Greece",
-  "Romania",
-  "Hungary",
-  "Croatia",
+  "Germany", "France", "Netherlands", "Spain", "Portugal", "Italy",
+  "Ireland", "Austria", "Belgium", "Sweden", "Denmark", "Finland",
+  "Norway", "Switzerland", "Poland", "Czech Republic", "Greece",
+  "Romania", "Hungary", "Croatia",
 ] as const;
 
 export const VISA_TYPES = [
-  "EU Blue Card",
-  "Work Visa",
-  "Digital Nomad",
-  "Student Visa",
-  "Family Reunion",
-  "Investment/Golden Visa",
-  "Freelance/Self-employed",
-  "EU Citizenship (descent)",
-  "Other",
+  "EU Blue Card", "Work Visa", "Digital Nomad", "Student Visa",
+  "Family Reunion", "Investment/Golden Visa", "Freelance/Self-employed",
+  "EU Citizenship (descent)", "Other",
 ] as const;
 
 export const EXCHANGE_RATES: Record<Currency, number> = {
@@ -168,8 +242,10 @@ export const EXCHANGE_RATES: Record<Currency, number> = {
   USD: 0.92,
   GBP: 1.17,
   CHF: 1.05,
+  INR: 0.011,
 };
 
+/** Convert any currency amount to EUR (used internally for cross-currency math) */
 export function toEUR(amount: number, currency: Currency): number {
   return amount * EXCHANGE_RATES[currency];
 }
