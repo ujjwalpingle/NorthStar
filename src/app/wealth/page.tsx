@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, PieChart, Target, Flame } from "lucide-react";
+import { Plus, Trash2, PieChart, Target, Flame, Pencil } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { useApp } from "@/contexts/app-context";
-import type { AccountCategory, AccountType, Currency } from "@/lib/types";
+import type { Account, AccountCategory, AccountType, Currency } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
 const ACCOUNT_TYPES: Record<AccountType, string> = {
@@ -19,8 +20,77 @@ const ACCOUNT_TYPES: Record<AccountType, string> = {
   crypto: "Crypto", property: "Property", gold: "Gold", other: "Other",
 };
 
+function EditAccountDialog({ account, onUpdate }: { account: Account, onUpdate: (id: string, updates: Partial<Account>) => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(account.name);
+  const [balance, setBalance] = useState(account.balance.toString());
+  const [type, setType] = useState<AccountType>(account.type);
+  const [category, setCategory] = useState<AccountCategory>(account.category);
+
+  function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name || !balance) return;
+    onUpdate(account.id, {
+      name,
+      balance: parseFloat(balance) || 0,
+      type,
+      category,
+    });
+    setOpen(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground">
+          <Pencil className="h-3 w-3" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Account</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleUpdate} className="grid gap-4 mt-2">
+          <div className="grid gap-2">
+            <Label>Name</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div className="grid gap-2">
+            <Label>Balance (INR)</Label>
+            <Input type="number" value={balance} onChange={(e) => setBalance(e.target.value)} required />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label>Category</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as AccountCategory)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="asset">Asset</SelectItem>
+                  <SelectItem value="liability">Liability</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Type</Label>
+              <Select value={type} onValueChange={(v) => setType(v as AccountType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(ACCOUNT_TYPES).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button type="submit" className="w-full mt-2">Save Changes</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function WealthPage() {
-  const { data, netWorth, totalAssets, totalLiabilities, addAccount, deleteAccount, addSnapshot } = useApp();
+  const { data, netWorth, totalAssets, totalLiabilities, addAccount, updateAccount, deleteAccount, addSnapshot } = useApp();
   const [name, setName] = useState("");
   const [balance, setBalance] = useState("");
   const [type, setType] = useState<AccountType>("checking");
@@ -200,9 +270,12 @@ export default function WealthPage() {
                     <p className="font-medium text-sm">{a.name}</p>
                     <p className="text-xs text-muted-foreground capitalize">{ACCOUNT_TYPES[a.type]}</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <p className="font-medium text-sm text-emerald-400">{formatCurrency(a.balance, a.currency)}</p>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-red-400" onClick={() => deleteAccount(a.id)}><Trash2 className="h-3 w-3" /></Button>
+                    <div className="flex items-center">
+                      <EditAccountDialog account={a} onUpdate={updateAccount} />
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-red-400" onClick={() => deleteAccount(a.id)}><Trash2 className="h-3 w-3" /></Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -222,9 +295,12 @@ export default function WealthPage() {
                       <p className="font-medium text-sm">{a.name}</p>
                       <p className="text-xs text-muted-foreground capitalize">{ACCOUNT_TYPES[a.type]}</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <p className="font-medium text-sm text-red-400">{formatCurrency(a.balance, a.currency)}</p>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-red-400" onClick={() => deleteAccount(a.id)}><Trash2 className="h-3 w-3" /></Button>
+                      <div className="flex items-center">
+                        <EditAccountDialog account={a} onUpdate={updateAccount} />
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-red-400" onClick={() => deleteAccount(a.id)}><Trash2 className="h-3 w-3" /></Button>
+                      </div>
                     </div>
                   </div>
                 ))
