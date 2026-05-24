@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { createDemoData } from "@/lib/demo-data";
+import { createDemoData, createEmptyData } from "@/lib/demo-data";
 import { isDemoMode } from "@/lib/config";
 import type {
   Account,
@@ -167,11 +167,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setData(migrateData(profileData as Partial<AppData>));
           } else {
             // New user, seed their data
-            const fresh = createDemoData();
+            const fresh = createEmptyData(user.id);
             // Set their profile properly
             fresh.profile = {
               ...fresh.profile,
-              id: user.id,
               email: user.email || "",
               full_name: user.user_metadata?.full_name || "",
               base_currency: user.user_metadata?.baseCurrency || "EUR",
