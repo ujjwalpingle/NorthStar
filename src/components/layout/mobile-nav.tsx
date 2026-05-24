@@ -7,41 +7,52 @@ import {
   Compass,
   LayoutDashboard,
   Settings,
-  Star,
+  TrendingUp,
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/wealth", label: "Wealth", icon: Wallet },
-  { href: "/career", label: "Career", icon: Briefcase },
-  { href: "/migration", label: "Migration", icon: Compass },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Home",      icon: LayoutDashboard },
+  { href: "/wealth",    label: "Wealth",    icon: Wallet },
+  { href: "/career",   label: "Career",    icon: Briefcase },
+  { href: "/migration",label: "Migration", icon: Compass },
+  { href: "/settings", label: "Settings",  icon: Settings },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md md:hidden">
-      <div className="flex items-center justify-around px-2 py-2">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(`${href}/`);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors min-w-[64px]",
-                active ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              <Icon className={cn("h-5 w-5", active && "text-primary")} />
-              {label}
-            </Link>
-          );
-        })}
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+      {/* Frosted glass border top */}
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="bg-sidebar/95 backdrop-blur-xl">
+        <div className="flex items-center justify-around px-1 py-2 pb-safe">
+          {navItems.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-all",
+                  active
+                    ? "text-primary"
+                    : "text-muted-foreground active:scale-95"
+                )}
+              >
+                <div className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
+                  active ? "bg-primary/15" : "bg-transparent"
+                )}>
+                  <Icon className={cn("h-4 w-4 transition-transform", active && "scale-110")} />
+                </div>
+                <span className={cn(active && "text-primary font-semibold")}>{label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
@@ -49,11 +60,13 @@ export function MobileNav() {
 
 export function MobileHeader() {
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-border bg-background/95 backdrop-blur-md px-4 md:hidden">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-        <Star className="h-4 w-4 text-primary-foreground" />
+    <header className="sticky top-0 z-40 md:hidden">
+      <div className="flex h-14 items-center gap-2.5 bg-sidebar/95 backdrop-blur-xl px-4 border-b border-sidebar-border">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 ring-1 ring-primary/30">
+          <TrendingUp className="h-3.5 w-3.5 text-primary" />
+        </div>
+        <span className="text-sm font-semibold tracking-tight">NorthStar</span>
       </div>
-      <span className="font-semibold">Ujjwal's Tracker</span>
     </header>
   );
 }

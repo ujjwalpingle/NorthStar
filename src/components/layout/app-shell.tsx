@@ -6,8 +6,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <Sidebar />
       <MobileHeader />
-      <main className="md:pl-64">
-        <div className="mx-auto max-w-6xl px-4 py-6 pb-24 md:pb-8">
+      <main className="md:pl-60">
+        <div className="mx-auto max-w-5xl px-5 py-7 pb-28 md:pb-10 animate-fade-in">
           {children}
         </div>
       </main>
