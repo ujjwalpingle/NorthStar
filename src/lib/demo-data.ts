@@ -3,9 +3,15 @@ import type {
   AppData,
   CareerGoal,
   ChecklistItem,
+  DailyTask,
+  Goal,
+  Habit,
+  HabitLog,
+  InterviewPrep,
   MigrationGoal,
   NetWorthSnapshot,
   Profile,
+  StudyTopic,
 } from "@/lib/types";
 import { generateId } from "@/lib/utils";
 
@@ -329,7 +335,169 @@ export function createDemoData(): AppData {
     notes: "Focus: MLOps + Platform Engineering. Timeline: Europe 2028. Blue Card target.",
   };
 
-  return { profile, accounts, snapshots, migrationGoal, checklist, career };
+  const habits: Habit[] = [
+    { id: generateId(), name: "Workout",         icon: "💪", category: "fitness",  frequency: "daily", targetCount: 1, created_at: ts },
+    { id: generateId(), name: "Coding",          icon: "💻", category: "career",   frequency: "daily", targetCount: 1, created_at: ts },
+    { id: generateId(), name: "DSA Practice",    icon: "🧠", category: "career",   frequency: "daily", targetCount: 1, created_at: ts },
+    { id: generateId(), name: "Reading",         icon: "📚", category: "learning", frequency: "daily", targetCount: 1, created_at: ts },
+    { id: generateId(), name: "Meditation",      icon: "🧘", category: "life",     frequency: "daily", targetCount: 1, created_at: ts },
+    { id: generateId(), name: "Track Expenses",  icon: "💰", category: "finance",  frequency: "daily", targetCount: 1, created_at: ts },
+  ];
+
+  // Generate habit logs for the past 30 days (realistic completion rates)
+  const completionRates: Record<number, number> = { 0: 0.8, 1: 0.9, 2: 0.7, 3: 0.6, 4: 0.65, 5: 0.75 };
+  const habitLogs: HabitLog[] = [];
+  for (let day = 0; day < 30; day++) {
+    const d = new Date();
+    d.setDate(d.getDate() - day);
+    const dateStr = d.toISOString().split("T")[0];
+    habits.forEach((habit, i) => {
+      if (Math.random() < (completionRates[i] ?? 0.7)) {
+        habitLogs.push({ id: generateId(), habit_id: habit.id, date: dateStr, count: 1 });
+      }
+    });
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const goals: Goal[] = [
+    {
+      id: generateId(),
+      title: "Save ₹20L for European Relocation",
+      description: "Build a dedicated fund to cover visa fees, flights, deposits, and first 3 months of expenses in Europe.",
+      category: "financial",
+      deadline: "2027-01-01",
+      milestones: [
+        { id: generateId(), title: "Save ₹5L",  completed: true,  dueDate: "2025-12-31" },
+        { id: generateId(), title: "Save ₹10L", completed: true,  dueDate: "2026-04-01" },
+        { id: generateId(), title: "Save ₹15L", completed: false, dueDate: "2026-09-01" },
+        { id: generateId(), title: "Save ₹20L", completed: false, dueDate: "2027-01-01" },
+      ],
+      targetValue: 2000000,
+      currentValue: 1200000,
+      unit: "₹",
+      status: "active",
+      created_at: ts,
+    },
+    {
+      id: generateId(),
+      title: "Get EU Blue Card",
+      description: "Secure an EU Blue Card by landing a qualified job offer in Germany.",
+      category: "migration",
+      deadline: "2028-06-30",
+      milestones: [
+        { id: generateId(), title: "Research Blue Card requirements",    completed: true,  dueDate: "2026-01-01" },
+        { id: generateId(), title: "Apostille degree certificates",       completed: false, dueDate: "2026-07-15" },
+        { id: generateId(), title: "Apply to 20 European companies",      completed: false, dueDate: "2027-06-30" },
+        { id: generateId(), title: "Receive job offer with sponsorship",  completed: false, dueDate: "2028-03-01" },
+        { id: generateId(), title: "Submit Blue Card application",        completed: false, dueDate: "2028-06-30" },
+      ],
+      targetValue: null,
+      currentValue: null,
+      unit: "%",
+      status: "active",
+      created_at: ts,
+    },
+    {
+      id: generateId(),
+      title: "Solve 300 DSA Problems",
+      description: "Solve 300 LeetCode problems (mix of easy/medium/hard) to be interview-ready for top companies.",
+      category: "career",
+      deadline: "2026-09-30",
+      milestones: [
+        { id: generateId(), title: "First 50 problems",  completed: true,  dueDate: "2026-02-28" },
+        { id: generateId(), title: "Reach 100 problems", completed: false, dueDate: "2026-05-31" },
+        { id: generateId(), title: "Reach 200 problems", completed: false, dueDate: "2026-07-31" },
+        { id: generateId(), title: "Reach 300 problems", completed: false, dueDate: "2026-09-30" },
+      ],
+      targetValue: 300,
+      currentValue: 87,
+      unit: "problems",
+      status: "active",
+      created_at: ts,
+    },
+    {
+      id: generateId(),
+      title: "Master Kubernetes",
+      description: "Reach expert level in Kubernetes — from pods to production-grade multi-cluster setups.",
+      category: "learning",
+      deadline: "2026-12-31",
+      milestones: [
+        { id: generateId(), title: "Core concepts & architecture",    completed: true,  dueDate: "2026-01-31" },
+        { id: generateId(), title: "Workloads, Services & Networking", completed: true,  dueDate: "2026-03-31" },
+        { id: generateId(), title: "Helm, RBAC & Security",           completed: false, dueDate: "2026-07-31" },
+        { id: generateId(), title: "Operators & CRDs",                completed: false, dueDate: "2026-10-31" },
+        { id: generateId(), title: "Production scaling & monitoring", completed: false, dueDate: "2026-12-31" },
+      ],
+      targetValue: 100,
+      currentValue: 40,
+      unit: "%",
+      status: "active",
+      created_at: ts,
+    },
+    {
+      id: generateId(),
+      title: "Run 5km Without Stopping",
+      description: "Build cardiovascular endurance to run 5km continuously at a steady pace.",
+      category: "fitness",
+      deadline: "2026-08-31",
+      milestones: [
+        { id: generateId(), title: "Run 1km without stopping", completed: true,  dueDate: "2026-03-31" },
+        { id: generateId(), title: "Run 2km without stopping", completed: true,  dueDate: "2026-04-30" },
+        { id: generateId(), title: "Run 3km without stopping", completed: false, dueDate: "2026-06-30" },
+        { id: generateId(), title: "Run 5km without stopping", completed: false, dueDate: "2026-08-31" },
+      ],
+      targetValue: 5,
+      currentValue: 2.5,
+      unit: "km",
+      status: "active",
+      created_at: ts,
+    },
+  ];
+
+  const dailyTasks: DailyTask[] = [
+    { id: generateId(), title: "Review Kubernetes operators chapter",       completed: false, date: today, category: "learning",  priority: "high" },
+    { id: generateId(), title: "Solve 2 LeetCode problems",                 completed: false, date: today, category: "learning",  priority: "high" },
+    { id: generateId(), title: "Update net worth tracker",                  completed: true,  date: today, category: "personal",  priority: "medium" },
+    { id: generateId(), title: "Research Germany Blue Card requirements",   completed: false, date: today, category: "migration", priority: "medium" },
+    { id: generateId(), title: "Reply to recruiter on LinkedIn",            completed: false, date: today, category: "work",      priority: "medium" },
+    { id: generateId(), title: "Read 20 pages of Deep Work",                completed: true,  date: today, category: "learning",  priority: "low" },
+  ];
+
+  const studyRoadmap: StudyTopic[] = [
+    { id: generateId(), skill: "Kubernetes", topic: "Core Concepts & Architecture",         status: "completed",   resources: ["k8s.io/docs", "KodeKloud"],             estimatedHours: 10, completedHours: 10 },
+    { id: generateId(), skill: "Kubernetes", topic: "Pods, Deployments & ReplicaSets",      status: "completed",   resources: ["k8s.io/docs"],                          estimatedHours: 8,  completedHours: 8  },
+    { id: generateId(), skill: "Kubernetes", topic: "Services, Ingress & Networking",       status: "in_progress", resources: ["KodeKloud", "YouTube: TechWorld"],       estimatedHours: 12, completedHours: 5  },
+    { id: generateId(), skill: "Kubernetes", topic: "Helm Charts & Package Management",     status: "not_started", resources: ["helm.sh/docs"],                          estimatedHours: 8,  completedHours: 0  },
+    { id: generateId(), skill: "Kubernetes", topic: "RBAC & Security",                      status: "not_started", resources: ["k8s.io/docs/security"],                  estimatedHours: 10, completedHours: 0  },
+    { id: generateId(), skill: "Kubernetes", topic: "Operators & CRDs",                     status: "not_started", resources: ["operatorhub.io"],                        estimatedHours: 15, completedHours: 0  },
+    { id: generateId(), skill: "Kubernetes", topic: "Production Scaling & Monitoring",      status: "not_started", resources: ["Prometheus docs", "Grafana"],             estimatedHours: 20, completedHours: 0  },
+    { id: generateId(), skill: "AWS",        topic: "IAM & Security Fundamentals",          status: "completed",   resources: ["AWS docs", "Udemy"],                     estimatedHours: 8,  completedHours: 8  },
+    { id: generateId(), skill: "AWS",        topic: "EC2, VPC & Networking",                status: "completed",   resources: ["AWS docs"],                              estimatedHours: 10, completedHours: 10 },
+    { id: generateId(), skill: "AWS",        topic: "EKS — Kubernetes on AWS",              status: "in_progress", resources: ["AWS EKS docs", "KodeKloud"],             estimatedHours: 15, completedHours: 6  },
+    { id: generateId(), skill: "AWS",        topic: "CI/CD with CodePipeline",              status: "not_started", resources: ["AWS docs"],                              estimatedHours: 8,  completedHours: 0  },
+    { id: generateId(), skill: "Terraform",  topic: "HCL Basics & State Management",        status: "completed",   resources: ["terraform.io/docs", "HashiCorp Learn"],  estimatedHours: 10, completedHours: 10 },
+    { id: generateId(), skill: "Terraform",  topic: "Modules & Remote State",               status: "in_progress", resources: ["HashiCorp Learn"],                       estimatedHours: 8,  completedHours: 4  },
+    { id: generateId(), skill: "Terraform",  topic: "Terraform Cloud & CI/CD Integration",  status: "not_started", resources: ["HashiCorp docs"],                        estimatedHours: 6,  completedHours: 0  },
+    { id: generateId(), skill: "System Design", topic: "Fundamentals & Scalability",        status: "in_progress", resources: ["Grokking System Design", "ByteByteGo"],  estimatedHours: 20, completedHours: 8  },
+    { id: generateId(), skill: "System Design", topic: "Distributed Systems & Databases",   status: "not_started", resources: ["DDIA book", "ByteByteGo"],               estimatedHours: 25, completedHours: 0  },
+  ];
+
+  const interviewPrep: InterviewPrep = {
+    dsaSolved: 87,
+    dsaTarget: 300,
+    systemDesignSessions: 5,
+    mockInterviews: 2,
+    resumeVersion: "v3.0",
+    applications: [
+      { id: generateId(), company: "Grafana Labs",  role: "Senior DevOps Engineer",    status: "wishlist",  appliedDate: null,         notes: "Remote-first, great OSS culture" },
+      { id: generateId(), company: "Cloudflare",    role: "Platform Engineer",         status: "applied",  appliedDate: "2026-05-10",  notes: "Applied via LinkedIn. Bangalore office." },
+      { id: generateId(), company: "Datadog",       role: "SRE Engineer",              status: "screening", appliedDate: "2026-05-01", notes: "Phone screen scheduled for June 2nd" },
+      { id: generateId(), company: "HashiCorp",     role: "Solutions Engineer",        status: "rejected",  appliedDate: "2026-04-15", notes: "No response after 3 weeks" },
+    ],
+  };
+
+  return { profile, accounts, snapshots, migrationGoal, checklist, career, habits, habitLogs, goals, dailyTasks, studyRoadmap, interviewPrep };
 }
 
 export const DEMO_USER_ID_EXPORT = DEMO_USER_ID;
