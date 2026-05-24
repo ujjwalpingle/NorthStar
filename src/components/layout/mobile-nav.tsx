@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, Compass, Flame, LayoutDashboard, Settings, Target, TrendingUp, Wallet } from "lucide-react";
+import { Briefcase, Globe, Flame, LayoutDashboard, Telescope, TrendingUp, Wallet, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", label: "Home",      icon: LayoutDashboard },
-  { href: "/wealth",    label: "Wealth",    icon: Wallet },
-  { href: "/habits",   label: "Habits",    icon: Flame },
-  { href: "/goals",    label: "Goals",     icon: Target },
-  { href: "/migration",label: "Migration", icon: Compass },
+  { href: "/dashboard", label: "Home",     icon: LayoutDashboard },
+  { href: "/wealth",    label: "Wealth",   icon: Wallet },
+  { href: "/momentum",  label: "Momentum", icon: Flame },
+  { href: "/europe",    label: "Europe",   icon: Globe },
+  { href: "/vision",    label: "Vision",   icon: Telescope },
 ];
 
 export function MobileNav() {
@@ -53,6 +53,11 @@ export function MobileHeader() {
           <TrendingUp className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-sm font-semibold tracking-tight">NorthStar</span>
+        <div className="ml-auto flex gap-2">
+          <Link href="/journal" className="text-muted-foreground hover:text-foreground transition-colors">
+            <BookOpen className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </header>
   );

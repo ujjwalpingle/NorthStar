@@ -28,6 +28,7 @@ import type {
   Profile,
   Skill,
   StudyTopic,
+  JournalEntry,
 } from "@/lib/types";
 import { generateId } from "@/lib/utils";
 import * as ds from "@/lib/supabase/data-service";
@@ -87,6 +88,8 @@ interface AppContextValue {
   updateStudyTopic: (id: string, updates: Partial<StudyTopic>) => void;
   // Interview Prep
   updateInterviewPrep: (updates: Partial<InterviewPrep>) => void;
+  // Journal
+  upsertJournalEntry: (entry: Partial<JournalEntry> & { date: string }) => void;
   // Admin
   resetDemoData: () => void;
 }
@@ -105,6 +108,7 @@ function migrateData(raw: Partial<AppData>): AppData {
     dailyTasks: (raw as AppData).dailyTasks ?? fresh.dailyTasks,
     studyRoadmap: (raw as AppData).studyRoadmap ?? fresh.studyRoadmap,
     interviewPrep: (raw as AppData).interviewPrep ?? fresh.interviewPrep,
+    journalEntries: (raw as AppData).journalEntries ?? [],
   };
 }
 
@@ -492,6 +496,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
+  // ── Journal ─────────────────────────────────────────────────────────────────
+  const upsertJournalEntry = useCallback(
+    (entry: Partial<JournalEntry> & { date: string }) => {
+      const ts = new Date().toISOString();
+      persist((p) => {
+        const existing = p.journalEntries.find((j) => j.date === entry.date);
+        if (existing) {
+          return { ...p, journalEntries: p.journalEntries.map((j) => j.date === entry.date ? { ...j, ...entry, updated_at: ts } : j) };
+        }
+        const newEntry: JournalEntry = {
+          id: generateId(),
+          date: entry.date,
+          dailyNote: entry.dailyNote ?? "",
+          weeklyWin: entry.weeklyWin ?? "",
+          weeklyBlocker: entry.weeklyBlocker ?? "",
+          weeklyFocus: entry.weeklyFocus ?? "",
+          weeklyGratitude: entry.weeklyGratitude ?? "",
+          type: entry.type ?? "daily",
+          created_at: ts,
+          updated_at: ts,
+        };
+        return { ...p, journalEntries: [...p.journalEntries, newEntry] };
+      });
+    },
+    [persist]
+  );
+
   // ── Admin ───────────────────────────────────────────────────────────────────
   const resetDemoData = useCallback(() => {
     const fresh = createDemoData();
@@ -513,6 +544,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addDailyTask, toggleDailyTask, deleteDailyTask,
     updateStudyTopic,
     updateInterviewPrep,
+    upsertJournalEntry,
     resetDemoData,
   };
 
