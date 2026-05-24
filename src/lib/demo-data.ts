@@ -501,3 +501,56 @@ export function createDemoData(): AppData {
 }
 
 export const DEMO_USER_ID_EXPORT = DEMO_USER_ID;
+
+export function createEmptyData(userId: string): AppData {
+  const ts = now();
+  const profile: Profile = {
+    id: userId,
+    email: "",
+    full_name: "",
+    base_currency: "EUR",
+    target_country: "",
+    migration_target_date: null,
+    created_at: ts,
+  };
+
+  const career: CareerGoal = {
+    id: generateId(),
+    currentPhase: 1,
+    currentRole: "",
+    yearsOfExperience: 0,
+    primaryFocus: "platform-engineering",
+    milestones: [],
+    skills: [],
+    targetCompanies: [],
+    targetCountriesEurope: [],
+    completedProjects: [],
+    inProgressProjects: [],
+    targetSalaryPhase3: 0,
+    notes: "",
+  };
+
+  const interviewPrep: InterviewPrep = {
+    dsaSolved: 0,
+    dsaTarget: 0,
+    systemDesignSessions: 0,
+    mockInterviews: 0,
+    resumeVersion: "",
+    applications: [],
+  };
+
+  return { 
+    profile, 
+    accounts: [], 
+    snapshots: [], 
+    migrationGoal: null, 
+    checklist: [], 
+    career, 
+    habits: [], 
+    habitLogs: [], 
+    goals: [], 
+    dailyTasks: [], 
+    studyRoadmap: [], 
+    interviewPrep 
+  };
+}
