@@ -8,3 +8,12 @@ export function isSupabaseConfigured(): boolean {
 export function isDemoMode(): boolean {
   return !isSupabaseConfigured();
 }
+
+// Auth configuration
+export function getAuthPassword(): string {
+  return process.env.NEXT_PUBLIC_AUTH_PASSWORD || "northstar";
+}
+
+export function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}

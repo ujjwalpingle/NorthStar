@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import { AppProvider } from "@/contexts/app-context";
+import { AuthGuard } from "@/components/auth-guard";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${geistMono.variable} h-full`}>
       <body className="min-h-full font-sans antialiased">
-        <AppProvider>{children}</AppProvider>
+        <AuthGuard>
+          <AppProvider>{children}</AppProvider>
+        </AuthGuard>
       </body>
     </html>
   );
