@@ -156,6 +156,21 @@ export interface InterviewPrep {
   applications: JobApplication[];
 }
 
+// ─── Journal ──────────────────────────────────────────────────────────────────
+
+export interface JournalEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  dailyNote: string;
+  weeklyWin: string;
+  weeklyBlocker: string;
+  weeklyFocus: string;
+  weeklyGratitude: string;
+  type: "daily" | "weekly";
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── App Data (root) ──────────────────────────────────────────────────────────
 
 export interface AppData {
@@ -171,6 +186,7 @@ export interface AppData {
   dailyTasks: DailyTask[];
   studyRoadmap: StudyTopic[];
   interviewPrep: InterviewPrep;
+  journalEntries: JournalEntry[];
 }
 
 // ─── Career ───────────────────────────────────────────────────────────────────

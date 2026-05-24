@@ -4,28 +4,32 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Briefcase,
-  Compass,
+  Globe,
   Flame,
   LayoutDashboard,
   Settings,
-  Target,
+  Telescope,
   TrendingUp,
   Wallet,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/contexts/app-context";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/wealth",    label: "Wealth",    icon: Wallet },
-  { href: "/career",   label: "Career",    icon: Briefcase },
-  { href: "/habits",   label: "Habits",    icon: Flame },
-  { href: "/goals",    label: "Goals",     icon: Target },
-  { href: "/migration",label: "Migration", icon: Compass },
-  { href: "/settings", label: "Settings",  icon: Settings },
+  { href: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/wealth",     label: "Wealth",      icon: Wallet },
+  { href: "/career",     label: "Career",      icon: Briefcase },
+  { href: "/momentum",   label: "Momentum",    icon: Flame },
+  { href: "/europe",     label: "Europe",       icon: Globe },
+  { href: "/journal",    label: "Journal",     icon: BookOpen },
+  { href: "/vision",     label: "Vision",      icon: Telescope },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data } = useApp();
+  const name = data?.profile?.full_name || "Ujjwal";
 
   return (
     <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 border-r bg-sidebar border-sidebar-border">
@@ -37,7 +41,7 @@ export function Sidebar() {
         </div>
         <div className="leading-tight">
           <p className="text-sm font-semibold tracking-tight">NorthStar</p>
-          <p className="text-[11px] text-muted-foreground">Ujjwal's OS</p>
+          <p className="text-[11px] text-muted-foreground">{name}&apos;s OS</p>
         </div>
       </div>
 
@@ -69,14 +73,24 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer widget */}
-      <div className="px-3 py-4 border-t border-sidebar-border">
-        <div className="rounded-lg bg-muted/40 px-3 py-3 space-y-1">
-          <p className="text-xs font-medium text-foreground">Wealth → Europe</p>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Building your path, one milestone at a time.
-          </p>
+      {/* Footer */}
+      <div className="px-3 py-4 border-t border-sidebar-border flex items-center justify-between">
+        <div className="rounded-lg bg-muted/40 px-3 py-2.5 flex-1 mr-2">
+          <p className="text-xs font-medium text-foreground">Build → Relocate → Thrive</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">The engineer&apos;s system</p>
         </div>
+        <Link
+          href="/settings"
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg transition-all shrink-0",
+            pathname === "/settings"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+          )}
+          title="Settings"
+        >
+          <Settings className="h-4 w-4" />
+        </Link>
       </div>
     </aside>
   );

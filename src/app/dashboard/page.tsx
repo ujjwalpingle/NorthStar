@@ -100,7 +100,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, Ujjwal 👋
+          Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, {data.profile.full_name || "there"} 👋
           </h1>
           <p className="text-muted-foreground text-sm">
             {format(new Date(), "EEEE, MMMM d")} · {data.migrationGoal?.target_country ?? "Germany"} · {data.migrationGoal?.visa_type ?? "EU Blue Card"}
@@ -239,29 +239,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Upcoming tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Migration Tasks</CardTitle>
-            <CardDescription>Next items on your checklist</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {data.checklist.filter((c) => !c.completed).slice(0, 4).map((item) => (
-                <div key={item.id} className="flex items-center justify-between rounded-lg border border-border px-4 py-2.5">
-                  <div>
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{item.category}</p>
-                  </div>
-                  <Badge variant={item.priority === "high" ? "destructive" : item.priority === "medium" ? "warning" : "secondary"}>
-                    {item.priority}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </AppShell>
   );
