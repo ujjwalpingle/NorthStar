@@ -133,7 +133,7 @@ export default function DashboardPage() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                     <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} />
+                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} />
                     <Tooltip
                       contentStyle={{ background: "#111827", border: "1px solid #1e293b", borderRadius: 8 }}
                       formatter={(value) => [formatCurrency(Number(value), currency), "Net Worth"]}
